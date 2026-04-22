@@ -3,10 +3,10 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { apiClient } from '@/lib/api-client';
-import { PaginatedResponse, Broker } from '@/lib/types';
+import { Broker } from '@/lib/types';
 
 async function fetchBrokers() {
-  const response = await apiClient.get<PaginatedResponse<Broker>>('/brokers/');
+  const response = await apiClient.get<Broker[]>('/brokers/');
   return response.data;
 }
 
