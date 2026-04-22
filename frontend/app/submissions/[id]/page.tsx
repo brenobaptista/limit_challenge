@@ -20,6 +20,7 @@ export default function SubmissionDetailPage() {
   const submissionId = params?.id ?? '';
 
   const detailQuery = useSubmissionDetail(submissionId);
+  const detailData = detailQuery.data;
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -48,9 +49,7 @@ export default function SubmissionDetailPage() {
               timelines.
             </Typography>
             <Divider sx={{ my: 2 }} />
-            <pre style={{ margin: 0, fontSize: 14 }}>
-              {JSON.stringify({ submissionId, queryKey: detailQuery.queryKey }, null, 2)}
-            </pre>
+            <pre style={{ margin: 0, fontSize: 14 }}>{JSON.stringify({ detailData }, null, 2)}</pre>
           </CardContent>
         </Card>
       </Stack>

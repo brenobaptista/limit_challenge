@@ -40,6 +40,7 @@ export default function SubmissionsPage() {
   );
 
   const submissionsQuery = useSubmissionsList(filters);
+  const submissionsData = submissionsQuery.data;
   const brokerQuery = useBrokerOptions();
 
   return (
@@ -108,7 +109,7 @@ export default function SubmissionsPage() {
               <Divider />
               <Box>
                 <pre style={{ margin: 0, fontSize: 14 }}>
-                  {JSON.stringify({ filters, queryKey: submissionsQuery.queryKey }, null, 2)}
+                  {JSON.stringify({ submissionsData }, null, 2)}
                 </pre>
               </Box>
             </Stack>
