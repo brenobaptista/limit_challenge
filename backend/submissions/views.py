@@ -20,7 +20,7 @@ class SubmissionViewSet(viewsets.ReadOnlyModelViewSet):
                 latest_note_author=Subquery(latest_note.values("author_name")[:1]),
                 latest_note_body=Subquery(latest_note.values("body")[:1]),
                 latest_note_created_at=Subquery(latest_note.values("created_at")[:1]),
-            )
+            ).order_by("-created_at")
 
         return queryset
 
