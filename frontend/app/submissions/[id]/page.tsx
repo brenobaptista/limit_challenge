@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  Alert,
   Box,
   Card,
   CardContent,
@@ -8,6 +9,7 @@ import {
   Container,
   Divider,
   Link as MuiLink,
+  CircularProgress,
   Stack,
   Typography,
 } from '@mui/material';
@@ -52,7 +54,7 @@ export default function SubmissionDetailPage() {
   const submissionId = params?.id ?? '';
 
   const detailQuery = useSubmissionDetail(submissionId);
-  const detail = detailQuery.data;
+  const { data, isLoading, isError } = detailQuery;
 
   return (
     <Container maxWidth="md" sx={{ py: 6 }}>
@@ -70,21 +72,27 @@ export default function SubmissionDetailPage() {
           </MuiLink>
         </Box>
 
-        {detail && (
+        {isLoading && (
+          <Box display="flex" justifyContent="center" py={6}>
+            <CircularProgress />
+          </Box>
+        )}
+        {isError && <Alert severity="error">Failed to load submission.</Alert>}
+        {data && (
           <>
-            <Section title={`Submission #${detail.id}`}>
+            <Section title={`Submission #${data.id}`}>
               <Item
-                primary={detail.summary}
+                primary={data.summary}
                 secondary={
                   <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                    <StatusChip status={detail.status} />
-                    <PriorityChip priority={detail.priority} />
+                    <StatusChip status={data.status} />
+                    <PriorityChip priority={data.priority} />
                   </Stack>
                 }
               />
               <Item
-                primary={`Created ${formatDateTime(detail.createdAt)}`}
-                secondary={`Updated ${formatDateTime(detail.updatedAt)}`}
+                primary={`Created ${formatDateTime(data.createdAt)}`}
+                secondary={`Updated ${formatDateTime(data.updatedAt)}`}
               />
             </Section>
 
@@ -94,24 +102,24 @@ export default function SubmissionDetailPage() {
               sx={{ '& > *': { flex: 1 } }}
             >
               <Section title="Broker">
-                <Item primary={detail.broker.name} secondary={detail.broker.primaryContactEmail} />
+                <Item primary={data.broker.name} secondary={data.broker.primaryContactEmail} />
               </Section>
 
               <Section title="Company">
                 <Item
-                  primary={detail.company.legalName}
+                  primary={data.company.legalName}
                   secondary={
                     <>
-                      {detail.company.industry}
+                      {data.company.industry}
                       <br />
-                      {detail.company.headquartersCity}
+                      {data.company.headquartersCity}
                     </>
                   }
                 />
               </Section>
 
               <Section title="Owner">
-                <Item primary={detail.owner.fullName} secondary={detail.owner.email} />
+                <Item primary={data.owner.fullName} secondary={data.owner.email} />
               </Section>
             </Stack>
 
@@ -121,7 +129,7 @@ export default function SubmissionDetailPage() {
               sx={{ '& > *': { flex: 1 } }}
             >
               <Section title="Contacts">
-                {detail.contacts.map((contact) => (
+                {data.contacts.map((contact) => (
                   <Item
                     key={contact.id}
                     primary={contact.name}
@@ -137,7 +145,7 @@ export default function SubmissionDetailPage() {
               </Section>
 
               <Section title="Documents">
-                {detail.documents.map((document) => (
+                {data.documents.map((document) => (
                   <Item
                     key={document.id}
                     primary={
@@ -163,7 +171,7 @@ export default function SubmissionDetailPage() {
             </Stack>
 
             <Section title="Notes">
-              {detail.notes.map((note) => (
+              {data.notes.map((note) => (
                 <Item
                   key={note.id}
                   primary={note.body}

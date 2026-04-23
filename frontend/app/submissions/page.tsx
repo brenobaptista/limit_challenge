@@ -1,12 +1,14 @@
 'use client';
 
 import {
+  Alert,
   Box,
   Card,
   CardContent,
   Container,
   Link as MuiLink,
   MenuItem,
+  CircularProgress,
   Stack,
   Table,
   TableBody,
@@ -36,6 +38,7 @@ const STATUS_OPTIONS: { label: string; value: SubmissionStatus | '' }[] = [
 ];
 
 const PAGE_SIZE = 10;
+const ALL_COLS = 100;
 
 export default function SubmissionsPage() {
   const [status, setStatus] = useState<SubmissionStatus | ''>('');
@@ -54,7 +57,7 @@ export default function SubmissionsPage() {
   );
 
   const submissionsQuery = useSubmissionsList(filters);
-  const submissions = submissionsQuery.data;
+  const { data, isLoading, isError } = submissionsQuery;
   const brokerQuery = useBrokerOptions();
 
   return (
@@ -136,7 +139,32 @@ export default function SubmissionsPage() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {submissions?.results.map((row) => (
+                {isLoading && (
+                  <TableRow>
+                    <TableCell colSpan={ALL_COLS} align="center" sx={{ py: 4 }}>
+                      <CircularProgress size={24} />
+                    </TableCell>
+                  </TableRow>
+                )}
+                {isError && (
+                  <TableRow>
+                    <TableCell colSpan={ALL_COLS}>
+                      <Alert severity="error">Failed to load submissions.</Alert>
+                    </TableCell>
+                  </TableRow>
+                )}
+                {data?.results.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={ALL_COLS}
+                      align="center"
+                      sx={{ py: 4, color: 'text.secondary' }}
+                    >
+                      No submissions found.
+                    </TableCell>
+                  </TableRow>
+                )}
+                {data?.results.map((row) => (
                   <TableRow key={row.id} hover>
                     <TableCell>{row.broker.name}</TableCell>
                     <TableCell>{row.company.legalName}</TableCell>
@@ -184,7 +212,7 @@ export default function SubmissionsPage() {
           </Box>
           <TablePagination
             component="div"
-            count={submissions?.count ?? 0}
+            count={data?.count ?? 0}
             rowsPerPage={PAGE_SIZE}
             rowsPerPageOptions={[PAGE_SIZE]}
             page={page}
