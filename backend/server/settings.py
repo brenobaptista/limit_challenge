@@ -41,9 +41,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'submissions',
+    'nplusone.ext.django',
 ]
 
 MIDDLEWARE = [
+    'nplusone.ext.django.NPlusOneMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -148,3 +150,5 @@ JSON_UNDERSCOREIZE = {
 }
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+NPLUSONE_RAISE = DEBUG

@@ -1,4 +1,6 @@
 asgiref==3.11.1
+blinker==1.9.0
+nplusone==1.0.0
 Deprecated==1.2.18
 distlib==0.3.8
 Django==5.2.12
