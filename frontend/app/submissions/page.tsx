@@ -5,14 +5,24 @@ import {
   Card,
   CardContent,
   Container,
-  Divider,
+  Link as MuiLink,
   MenuItem,
   Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TablePagination,
+  TableRow,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
+import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
+import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
+import { formatDate } from '@/lib/date';
 import { useBrokerOptions } from '@/lib/hooks/useBrokerOptions';
 import { useSubmissionsList } from '@/lib/hooks/useSubmissions';
 import { SubmissionStatus } from '@/lib/types';
@@ -25,22 +35,26 @@ const STATUS_OPTIONS: { label: string; value: SubmissionStatus | '' }[] = [
   { label: 'Lost', value: 'lost' },
 ];
 
+const PAGE_SIZE = 10;
+
 export default function SubmissionsPage() {
   const [status, setStatus] = useState<SubmissionStatus | ''>('');
   const [brokerId, setBrokerId] = useState('');
   const [companyQuery, setCompanyQuery] = useState('');
+  const [page, setPage] = useState(0);
 
   const filters = useMemo(
     () => ({
       status: status || undefined,
       brokerId: brokerId || undefined,
       companySearch: companyQuery || undefined,
+      page: page + 1,
     }),
-    [status, brokerId, companyQuery],
+    [status, brokerId, companyQuery, page],
   );
 
   const submissionsQuery = useSubmissionsList(filters);
-  const submissionsData = submissionsQuery.data;
+  const submissions = submissionsQuery.data;
   const brokerQuery = useBrokerOptions();
 
   return (
@@ -51,8 +65,7 @@ export default function SubmissionsPage() {
             Submissions
           </Typography>
           <Typography color="text.secondary">
-            Filters update the query parameters and drive backend filtering. Hook these inputs to
-            your API calls when you implement the actual data fetching.
+            Browse and filter submissions by status, broker, or company name.
           </Typography>
         </Box>
 
@@ -63,7 +76,10 @@ export default function SubmissionsPage() {
                 select
                 label="Status"
                 value={status}
-                onChange={(event) => setStatus(event.target.value as SubmissionStatus | '')}
+                onChange={(event) => {
+                  setStatus(event.target.value as SubmissionStatus | '');
+                  setPage(0);
+                }}
                 fullWidth
               >
                 {STATUS_OPTIONS.map((option) => (
@@ -76,9 +92,11 @@ export default function SubmissionsPage() {
                 select
                 label="Broker"
                 value={brokerId}
-                onChange={(event) => setBrokerId(event.target.value)}
+                onChange={(event) => {
+                  setBrokerId(event.target.value);
+                  setPage(0);
+                }}
                 fullWidth
-                helperText="Populate options via /api/brokers"
               >
                 <MenuItem value="">All brokers</MenuItem>
                 {brokerQuery.data?.map((broker) => (
@@ -90,30 +108,88 @@ export default function SubmissionsPage() {
               <TextField
                 label="Company search"
                 value={companyQuery}
-                onChange={(event) => setCompanyQuery(event.target.value)}
+                onChange={(event) => {
+                  setCompanyQuery(event.target.value);
+                  setPage(0);
+                }}
                 fullWidth
-                helperText="Send as ?companySearch=..."
               />
             </Stack>
           </CardContent>
         </Card>
 
         <Card variant="outlined">
-          <CardContent>
-            <Stack spacing={2}>
-              <Typography variant="h6">Submission list</Typography>
-              <Typography color="text.secondary">
-                Hook `submissionsQuery` to render rows, totals, and pagination states. The query is
-                disabled by default so no network calls fire until you enable it.
-              </Typography>
-              <Divider />
-              <Box>
-                <pre style={{ margin: 0, fontSize: 14 }}>
-                  {JSON.stringify({ submissionsData }, null, 2)}
-                </pre>
-              </Box>
-            </Stack>
-          </CardContent>
+          <Box overflow="auto">
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Broker</TableCell>
+                  <TableCell>Company</TableCell>
+                  <TableCell>Owner</TableCell>
+                  <TableCell align="right">Docs</TableCell>
+                  <TableCell align="right">Notes</TableCell>
+                  <TableCell>Latest note</TableCell>
+                  <TableCell>Created</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Priority</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {submissions?.results.map((row) => (
+                  <TableRow key={row.id} hover>
+                    <TableCell>{row.broker.name}</TableCell>
+                    <TableCell>{row.company.legalName}</TableCell>
+                    <TableCell>{row.owner.fullName}</TableCell>
+                    <TableCell align="right">{row.documentCount}</TableCell>
+                    <TableCell align="right">{row.noteCount}</TableCell>
+                    <TableCell sx={{ maxWidth: 260 }}>
+                      {row.latestNote && (
+                        <Tooltip title={row.latestNote.bodyPreview} placement="top-start">
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: '-webkit-box',
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: 'vertical',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {row.latestNote.bodyPreview}
+                          </Typography>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(row.createdAt)}</TableCell>
+                    <TableCell>
+                      <StatusChip status={row.status} />
+                    </TableCell>
+                    <TableCell>
+                      <PriorityChip priority={row.priority} />
+                    </TableCell>
+                    <TableCell align="right">
+                      <MuiLink
+                        component={Link}
+                        href={`/submissions/${row.id}`}
+                        underline="hover"
+                        variant="body2"
+                      >
+                        View
+                      </MuiLink>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+          <TablePagination
+            component="div"
+            count={submissions?.count ?? 0}
+            rowsPerPage={PAGE_SIZE}
+            rowsPerPageOptions={[PAGE_SIZE]}
+            page={page}
+            onPageChange={(_, newPage) => setPage(newPage)}
+          />
         </Card>
       </Stack>
     </Container>
