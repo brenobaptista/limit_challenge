@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { QueryKey, useQuery, keepPreviousData } from '@tanstack/react-query';
 
 import { apiClient } from '@/lib/api-client';
@@ -50,8 +49,4 @@ export function useSubmissionDetail(id: string | number) {
     queryFn: () => fetchSubmissionDetail(id),
     staleTime: 60_000,
   });
-}
-
-export function useSubmissionQueryKey(filters: SubmissionListFilters) {
-  return useMemo(() => [SUBMISSIONS_QUERY_KEY, filters] as QueryKey, [filters]);
 }
