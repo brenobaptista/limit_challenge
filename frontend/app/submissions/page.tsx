@@ -144,7 +144,10 @@ export default function SubmissionsPage() {
                 onChange={(event) =>
                   updateFilters({ createdFrom: event.target.value, page: undefined })
                 }
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{
+                  inputLabel: { shrink: true },
+                  htmlInput: { max: createdTo || undefined },
+                }}
               />
               <TextField
                 type="date"
@@ -153,7 +156,10 @@ export default function SubmissionsPage() {
                 onChange={(event) =>
                   updateFilters({ createdTo: event.target.value, page: undefined })
                 }
-                slotProps={{ inputLabel: { shrink: true } }}
+                slotProps={{
+                  inputLabel: { shrink: true },
+                  htmlInput: { min: createdFrom || undefined },
+                }}
               />
               <Stack direction="row" alignItems="center">
                 <FormControlLabel
