@@ -193,8 +193,8 @@ export default function SubmissionsPage() {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Broker</TableCell>
                   <TableCell>Company</TableCell>
+                  <TableCell>Broker</TableCell>
                   <TableCell>Owner</TableCell>
                   <TableCell align="right">Docs</TableCell>
                   <TableCell align="right">Notes</TableCell>
@@ -233,8 +233,8 @@ export default function SubmissionsPage() {
                 )}
                 {data?.results.map((row) => (
                   <TableRow key={row.id} hover>
-                    <TableCell>{row.broker.name}</TableCell>
                     <TableCell>{row.company.legalName}</TableCell>
+                    <TableCell>{row.broker.name}</TableCell>
                     <TableCell>{row.owner.fullName}</TableCell>
                     <TableCell align="right">{row.documentCount}</TableCell>
                     <TableCell align="right">{row.noteCount}</TableCell>
