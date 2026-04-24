@@ -136,3 +136,35 @@ Visit `http://localhost:3000/submissions` to start building.
 ## Optional Bonus
 
 Authentication, deployment, or extra tooling are not required but welcome if scope allows.
+
+## My Notes
+
+### Approach
+
+**Backend:** Implemented required and optional filters. Fixed N+1 query problem and set up `nplusone` middleware. Turned off pagination on `/api/brokers/` because it's used for a dropdown filter, paginating it would hide options.
+
+**Frontend:** A table with filter and pagination state in the URL so it survives a refresh. I went with a table over cards because the data is uniform and dense, so easier to scan a column than read individual cards. Detail page uses a list of cards to dump all missing data. Added some reusable components (SubmissionChips) and lib (date). Implement loading, empty and error states.
+
+### Tradeoffs & Assumptions
+
+- A document without url doesn't seem useful, so removed `blank=True` from `document.file_url`
+- Assumed the user would use desktop for work, but implemented mobile using horizontal scroll on table.
+- The broker endpoint used pagination but I removed it because if we had more than 10 brokers they would be hidden. Fine at this size, but with hundreds of brokers we would need to use a searchable input instead.
+- Latest note column on table relies on hover. I assumed this data was important to the users, so squeezed it into the table.
+
+### How to run tests
+
+```bash
+cd backend && source .venv/bin/activate && pytest
+```
+
+### Stretch Goals
+
+- Fixed some stuff on the scaffold: use explicitly python3.10; set up ALLOWED_HOSTS and gitignore; remove 'use client' from hooks and unused useSubmissionQueryKey; updated "Getting Started" README section
+- Set up `nplusone` middleware to catch N+1 query problem during development
+- Implemented optional filters `createdFrom`, `createdTo`, `hasDocuments` and `hasNotes`
+- Tested filters and N+1 regression
+- Handle filter and page states in the URL so it's shareable and survives refresh
+- I noticed the table flickers during pagination, so I fixed it using `placeholderData: keepPreviousData`
+- I checked which fields could be empty and implemented blank state in the sections. I updated the seed so it's easier to see.
+- Fix UnorderedObjectListWarning on backend terminal to fix inconsistent pagination
