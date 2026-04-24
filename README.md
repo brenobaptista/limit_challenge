@@ -88,8 +88,7 @@ cd backend
 python3.10 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
-python manage.py seed_submissions  # optional but recommended
-# add --force to rebuild the generated sample data
+python manage.py seed_submissions  # add --force to rebuild
 python manage.py runserver 0.0.0.0:8000
 ```
 
@@ -98,9 +97,13 @@ python manage.py runserver 0.0.0.0:8000
 ```bash
 cd frontend
 npm install
-cp .env.example .env.local  # create if you want a custom API base
-# NEXT_PUBLIC_API_BASE_URL defaults to http://localhost:8000/api
 npm run dev
+```
+
+To use a custom API base URL, create `frontend/.env.local`:
+
+```
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
 ```
 
 Visit `http://localhost:3000/submissions` to start building.
