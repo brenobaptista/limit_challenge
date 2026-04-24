@@ -63,14 +63,9 @@ export default function SubmissionsPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
       <Stack spacing={4}>
-        <Box>
-          <Typography variant="h4" component="h1">
-            Submissions
-          </Typography>
-          <Typography color="text.secondary">
-            Browse and filter submissions by status, broker, or company name.
-          </Typography>
-        </Box>
+        <Typography variant="h4" component="h1">
+          Submissions
+        </Typography>
 
         <Card variant="outlined">
           <CardContent>
