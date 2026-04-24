@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { QueryKey, useQuery } from '@tanstack/react-query';
+import { QueryKey, useQuery, keepPreviousData } from '@tanstack/react-query';
 
 import { apiClient } from '@/lib/api-client';
 import {
@@ -38,6 +38,7 @@ export function useSubmissionsList(filters: SubmissionListFilters) {
   return useQuery({
     queryKey: [SUBMISSIONS_QUERY_KEY, filters] as QueryKey,
     queryFn: () => fetchSubmissions(filters),
+    placeholderData: keepPreviousData,
   });
 }
 
