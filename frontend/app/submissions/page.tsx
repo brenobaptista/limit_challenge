@@ -123,7 +123,7 @@ export default function SubmissionsPage() {
 
         <Card variant="outlined">
           <Box overflow="auto">
-            <Table size="small">
+            <Table>
               <TableHead>
                 <TableRow>
                   <TableCell>Broker</TableCell>

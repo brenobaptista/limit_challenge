@@ -20,24 +20,42 @@ import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
 import { formatDateTime } from '@/lib/date';
 import { useSubmissionDetail } from '@/lib/hooks/useSubmissions';
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  children,
+  columns = 1,
+}: {
+  title: string;
+  children: React.ReactNode;
+  columns?: number;
+}) {
   return (
     <Card variant="outlined">
       <CardHeader title={<Typography variant="subtitle1">{title}</Typography>} />
       <Divider />
       <CardContent>
-        <Stack divider={<Divider />} spacing={2}>
-          {children}
-        </Stack>
+        {columns > 1 ? (
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: `repeat(${columns}, 1fr)` },
+              gap: 3,
+            }}
+          >
+            {children}
+          </Box>
+        ) : (
+          <Stack spacing={3}>{children}</Stack>
+        )}
       </CardContent>
     </Card>
   );
 }
 
-function Item({ primary, secondary }: { primary: React.ReactNode; secondary: React.ReactNode }) {
+function Item({ primary, secondary }: { primary: React.ReactNode; secondary?: React.ReactNode }) {
   return (
     <Box>
-      <Typography variant="body2" fontWeight={500}>
+      <Typography variant="body2" fontWeight={500} component="div">
         {primary}
       </Typography>
       {secondary && (
@@ -82,12 +100,14 @@ export default function SubmissionDetailPage() {
           <>
             <Section title={`Submission #${data.id}`}>
               <Item
-                primary={data.summary}
-                secondary={
-                  <Stack direction="row" spacing={1} sx={{ mt: 0.5 }}>
-                    <StatusChip status={data.status} />
-                    <PriorityChip priority={data.priority} />
-                  </Stack>
+                primary={
+                  <Box display="flex" justifyContent="space-between" gap={1}>
+                    <span>{data.summary}</span>
+                    <Stack direction="row" spacing={1}>
+                      <StatusChip status={data.status} />
+                      <PriorityChip priority={data.priority} />
+                    </Stack>
+                  </Box>
                 }
               />
               <Item
@@ -123,52 +143,46 @@ export default function SubmissionDetailPage() {
               </Section>
             </Stack>
 
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
-              sx={{ '& > *': { flex: 1 } }}
-            >
-              <Section title="Contacts">
-                {data.contacts.map((contact) => (
-                  <Item
-                    key={contact.id}
-                    primary={contact.name}
-                    secondary={
-                      <>
-                        {[contact.role, contact.email, contact.phone]
-                          .filter(Boolean)
-                          .flatMap((item, i) => (i === 0 ? [item] : [<br key={i} />, item]))}
-                      </>
-                    }
-                  />
-                ))}
-              </Section>
+            <Section title="Contacts" columns={2}>
+              {data.contacts.map((contact) => (
+                <Item
+                  key={contact.id}
+                  primary={contact.name}
+                  secondary={
+                    <>
+                      {[contact.role, contact.email, contact.phone]
+                        .filter(Boolean)
+                        .flatMap((item, i) => (i === 0 ? [item] : [<br key={i} />, item]))}
+                    </>
+                  }
+                />
+              ))}
+            </Section>
 
-              <Section title="Documents">
-                {data.documents.map((document) => (
-                  <Item
-                    key={document.id}
-                    primary={
-                      <MuiLink
-                        href={document.fileUrl}
-                        target="_blank"
-                        rel="noopener"
-                        underline="hover"
-                      >
-                        {document.title}
-                      </MuiLink>
-                    }
-                    secondary={
-                      <>
-                        {document.docType}
-                        <br />
-                        {formatDateTime(document.uploadedAt)}
-                      </>
-                    }
-                  />
-                ))}
-              </Section>
-            </Stack>
+            <Section title="Documents" columns={2}>
+              {data.documents.map((document) => (
+                <Item
+                  key={document.id}
+                  primary={
+                    <MuiLink
+                      href={document.fileUrl}
+                      target="_blank"
+                      rel="noopener"
+                      underline="hover"
+                    >
+                      {document.title}
+                    </MuiLink>
+                  }
+                  secondary={
+                    <>
+                      {document.docType}
+                      <br />
+                      {formatDateTime(document.uploadedAt)}
+                    </>
+                  }
+                />
+              ))}
+            </Section>
 
             <Section title="Notes">
               {data.notes.map((note) => (
