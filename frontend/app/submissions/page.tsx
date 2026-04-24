@@ -27,7 +27,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
-import { formatDate, toEndOfDayUTC, toStartOfDayUTC } from '@/lib/date';
+import { formatDate, toLocalDayEndISO, toLocalDayStartISO } from '@/lib/date';
 import { useBrokerOptions } from '@/lib/hooks/useBrokerOptions';
 import { useSubmissionsList } from '@/lib/hooks/useSubmissions';
 import { SubmissionStatus } from '@/lib/types';
@@ -73,8 +73,8 @@ export default function SubmissionsPage() {
       status: status || undefined,
       brokerId: brokerId || undefined,
       companySearch: companyQuery || undefined,
-      createdFrom: createdFrom ? toStartOfDayUTC(createdFrom) : undefined,
-      createdTo: createdTo ? toEndOfDayUTC(createdTo) : undefined,
+      createdFrom: createdFrom ? toLocalDayStartISO(createdFrom) : undefined,
+      createdTo: createdTo ? toLocalDayEndISO(createdTo) : undefined,
       hasDocuments: hasDocuments || undefined,
       hasNotes: hasNotes || undefined,
       page: urlPage,
