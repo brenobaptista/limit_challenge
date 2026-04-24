@@ -132,9 +132,9 @@ export default function SubmissionsPage() {
                   <TableCell align="right">Docs</TableCell>
                   <TableCell align="right">Notes</TableCell>
                   <TableCell>Latest note</TableCell>
-                  <TableCell>Created</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Priority</TableCell>
+                  <TableCell>Created</TableCell>
                   <TableCell />
                 </TableRow>
               </TableHead>
@@ -188,13 +188,13 @@ export default function SubmissionsPage() {
                         </Tooltip>
                       )}
                     </TableCell>
-                    <TableCell>{formatDate(row.createdAt)}</TableCell>
                     <TableCell>
                       <StatusChip status={row.status} />
                     </TableCell>
                     <TableCell>
                       <PriorityChip priority={row.priority} />
                     </TableCell>
+                    <TableCell>{formatDate(row.createdAt)}</TableCell>
                     <TableCell align="right">
                       <MuiLink
                         component={Link}
