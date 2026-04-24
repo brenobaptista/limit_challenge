@@ -163,7 +163,7 @@ export default function SubmissionDetailPage() {
                     <MuiLink
                       href={document.fileUrl}
                       target="_blank"
-                      rel="noopener"
+                      rel="noopener noreferrer"
                       underline="hover"
                     >
                       {document.title}
