@@ -128,13 +128,9 @@ export default function SubmissionDetailPage() {
               <Section title="Company">
                 <Item
                   primary={data.company.legalName}
-                  secondary={
-                    <>
-                      {data.company.industry}
-                      <br />
-                      {data.company.headquartersCity}
-                    </>
-                  }
+                  secondary={[data.company.industry, data.company.headquartersCity]
+                    .filter(Boolean)
+                    .join(' - ')}
                 />
               </Section>
 
@@ -144,22 +140,28 @@ export default function SubmissionDetailPage() {
             </Stack>
 
             <Section title="Contacts" columns={2}>
+              {data.contacts.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No contacts.
+                </Typography>
+              )}
               {data.contacts.map((contact) => (
                 <Item
                   key={contact.id}
                   primary={contact.name}
-                  secondary={
-                    <>
-                      {[contact.role, contact.email, contact.phone]
-                        .filter(Boolean)
-                        .flatMap((item, i) => (i === 0 ? [item] : [<br key={i} />, item]))}
-                    </>
-                  }
+                  secondary={[contact.role, contact.email, contact.phone]
+                    .filter(Boolean)
+                    .join(' - ')}
                 />
               ))}
             </Section>
 
             <Section title="Documents" columns={2}>
+              {data.documents.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No documents.
+                </Typography>
+              )}
               {data.documents.map((document) => (
                 <Item
                   key={document.id}
@@ -185,6 +187,11 @@ export default function SubmissionDetailPage() {
             </Section>
 
             <Section title="Notes">
+              {data.notes.length === 0 && (
+                <Typography variant="body2" color="text.secondary">
+                  No notes.
+                </Typography>
+              )}
               {data.notes.map((note) => (
                 <Item
                   key={note.id}

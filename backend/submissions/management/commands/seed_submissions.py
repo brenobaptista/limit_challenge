@@ -129,6 +129,41 @@ class Command(BaseCommand):
         models.Document.objects.bulk_create(documents)
         models.Note.objects.bulk_create(notes)
 
+        # Edge case 1: all optional fields blank, no related objects
+        empty_broker = models.Broker.objects.create(name="Empty Broker", primary_contact_email="")
+        empty_company = models.Company.objects.create(
+            legal_name="Empty Company", industry="", headquarters_city=""
+        )
+        empty_owner = models.TeamMember.objects.create(
+            full_name="Empty Owner", email="empty@example.com"
+        )
+        models.Submission.objects.create(
+            company=empty_company, broker=empty_broker, owner=empty_owner, summary=""
+        )
+
+        # Edge case 2: contact with no role/email/phone
+        sparse_broker = models.Broker.objects.create(
+            name="Sparse Broker", primary_contact_email=""
+        )
+        sparse_company = models.Company.objects.create(
+            legal_name="Sparse Company", industry="", headquarters_city=""
+        )
+        sparse_owner = models.TeamMember.objects.create(
+            full_name="Sparse Owner", email="sparse@example.com"
+        )
+        sparse_submission = models.Submission.objects.create(
+            company=sparse_company,
+            broker=sparse_broker,
+            owner=sparse_owner,
+            summary="Submission with sparse related data.",
+        )
+        models.Contact.objects.create(
+            submission=sparse_submission, name="Sparse Contact", role="", email="", phone=""
+        )
+        models.Document.objects.create(
+            submission=sparse_submission, title="Sparse Document", doc_type="Contract", file_url="https://example.com/sparse.pdf"
+        )
+
         self.stdout.write(
             self.style.SUCCESS(
                 f"Seed data created: {len(submissions)} submissions, "
