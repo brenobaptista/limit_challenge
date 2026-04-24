@@ -19,6 +19,10 @@ async function fetchSubmissions(filters: SubmissionListFilters) {
       status: filters.status,
       brokerId: filters.brokerId,
       companySearch: filters.companySearch,
+      createdFrom: filters.createdFrom,
+      createdTo: filters.createdTo,
+      hasDocuments: filters.hasDocuments,
+      hasNotes: filters.hasNotes,
       page: filters.page,
     },
   });

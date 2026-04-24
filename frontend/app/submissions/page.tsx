@@ -5,7 +5,9 @@ import {
   Box,
   Card,
   CardContent,
+  Checkbox,
   Container,
+  FormControlLabel,
   Link as MuiLink,
   MenuItem,
   CircularProgress,
@@ -24,7 +26,7 @@ import Link from 'next/link';
 import { useMemo, useState } from 'react';
 
 import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
-import { formatDate } from '@/lib/date';
+import { formatDate, toEndOfDayUTC, toStartOfDayUTC } from '@/lib/date';
 import { useBrokerOptions } from '@/lib/hooks/useBrokerOptions';
 import { useSubmissionsList } from '@/lib/hooks/useSubmissions';
 import { SubmissionStatus } from '@/lib/types';
@@ -44,6 +46,10 @@ export default function SubmissionsPage() {
   const [status, setStatus] = useState<SubmissionStatus | ''>('');
   const [brokerId, setBrokerId] = useState('');
   const [companyQuery, setCompanyQuery] = useState('');
+  const [createdFrom, setCreatedFrom] = useState('');
+  const [createdTo, setCreatedTo] = useState('');
+  const [hasDocuments, setHasDocuments] = useState(false);
+  const [hasNotes, setHasNotes] = useState(false);
   const [page, setPage] = useState(0);
 
   const filters = useMemo(
@@ -51,9 +57,13 @@ export default function SubmissionsPage() {
       status: status || undefined,
       brokerId: brokerId || undefined,
       companySearch: companyQuery || undefined,
+      createdFrom: createdFrom ? toStartOfDayUTC(createdFrom) : undefined,
+      createdTo: createdTo ? toEndOfDayUTC(createdTo) : undefined,
+      hasDocuments: hasDocuments || undefined,
+      hasNotes: hasNotes || undefined,
       page: page + 1,
     }),
-    [status, brokerId, companyQuery, page],
+    [status, brokerId, companyQuery, createdFrom, createdTo, hasDocuments, hasNotes, page],
   );
 
   const submissionsQuery = useSubmissionsList(filters);
@@ -69,7 +79,13 @@ export default function SubmissionsPage() {
 
         <Card variant="outlined">
           <CardContent>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, 1fr)' },
+                gap: 2,
+              }}
+            >
               <TextField
                 select
                 label="Status"
@@ -78,7 +94,6 @@ export default function SubmissionsPage() {
                   setStatus(event.target.value as SubmissionStatus | '');
                   setPage(0);
                 }}
-                fullWidth
               >
                 {STATUS_OPTIONS.map((option) => (
                   <MenuItem key={option.value || 'all'} value={option.value}>
@@ -94,7 +109,6 @@ export default function SubmissionsPage() {
                   setBrokerId(event.target.value);
                   setPage(0);
                 }}
-                fullWidth
               >
                 <MenuItem value="">All brokers</MenuItem>
                 {brokerQuery.data?.map((broker) => (
@@ -110,9 +124,54 @@ export default function SubmissionsPage() {
                   setCompanyQuery(event.target.value);
                   setPage(0);
                 }}
-                fullWidth
               />
-            </Stack>
+              <TextField
+                type="date"
+                label="Created from"
+                value={createdFrom}
+                onChange={(event) => {
+                  setCreatedFrom(event.target.value);
+                  setPage(0);
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <TextField
+                type="date"
+                label="Created to"
+                value={createdTo}
+                onChange={(event) => {
+                  setCreatedTo(event.target.value);
+                  setPage(0);
+                }}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+              <Stack direction="row" alignItems="center">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={hasDocuments}
+                      onChange={(event) => {
+                        setHasDocuments(event.target.checked);
+                        setPage(0);
+                      }}
+                    />
+                  }
+                  label="Has documents"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={hasNotes}
+                      onChange={(event) => {
+                        setHasNotes(event.target.checked);
+                        setPage(0);
+                      }}
+                    />
+                  }
+                  label="Has notes"
+                />
+              </Stack>
+            </Box>
           </CardContent>
         </Card>
 
