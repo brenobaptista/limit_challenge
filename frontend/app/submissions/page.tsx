@@ -23,7 +23,7 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useMemo } from 'react';
 
 import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
@@ -44,6 +44,7 @@ const PAGE_SIZE = 10;
 const ALL_COLS = 100;
 
 export default function SubmissionsPage() {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -65,7 +66,7 @@ export default function SubmissionsPage() {
         params.set(key, value);
       }
     }
-    window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
   const filters = useMemo(
