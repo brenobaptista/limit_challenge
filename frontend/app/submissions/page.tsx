@@ -23,7 +23,8 @@ import {
   Typography,
 } from '@mui/material';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { useMemo } from 'react';
 
 import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
 import { formatDate, toEndOfDayUTC, toStartOfDayUTC } from '@/lib/date';
@@ -43,14 +44,29 @@ const PAGE_SIZE = 10;
 const ALL_COLS = 100;
 
 export default function SubmissionsPage() {
-  const [status, setStatus] = useState<SubmissionStatus | ''>('');
-  const [brokerId, setBrokerId] = useState('');
-  const [companyQuery, setCompanyQuery] = useState('');
-  const [createdFrom, setCreatedFrom] = useState('');
-  const [createdTo, setCreatedTo] = useState('');
-  const [hasDocuments, setHasDocuments] = useState(false);
-  const [hasNotes, setHasNotes] = useState(false);
-  const [page, setPage] = useState(0);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const status = (searchParams.get('status') ?? '') as SubmissionStatus | '';
+  const brokerId = searchParams.get('brokerId') ?? '';
+  const companyQuery = searchParams.get('companySearch') ?? '';
+  const createdFrom = searchParams.get('createdFrom') ?? '';
+  const createdTo = searchParams.get('createdTo') ?? '';
+  const hasDocuments = searchParams.get('hasDocuments') === 'true';
+  const hasNotes = searchParams.get('hasNotes') === 'true';
+  const urlPage = Number(searchParams.get('page') ?? '1');
+
+  const updateFilters = (updates: Record<string, string | undefined>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(updates)) {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    }
+    window.history.replaceState(null, '', `${pathname}?${params.toString()}`);
+  };
 
   const filters = useMemo(
     () => ({
@@ -61,9 +77,9 @@ export default function SubmissionsPage() {
       createdTo: createdTo ? toEndOfDayUTC(createdTo) : undefined,
       hasDocuments: hasDocuments || undefined,
       hasNotes: hasNotes || undefined,
-      page: page + 1,
+      page: urlPage,
     }),
-    [status, brokerId, companyQuery, createdFrom, createdTo, hasDocuments, hasNotes, page],
+    [status, brokerId, companyQuery, createdFrom, createdTo, hasDocuments, hasNotes, urlPage],
   );
 
   const submissionsQuery = useSubmissionsList(filters);
@@ -90,10 +106,7 @@ export default function SubmissionsPage() {
                 select
                 label="Status"
                 value={status}
-                onChange={(event) => {
-                  setStatus(event.target.value as SubmissionStatus | '');
-                  setPage(0);
-                }}
+                onChange={(event) => updateFilters({ status: event.target.value, page: undefined })}
               >
                 {STATUS_OPTIONS.map((option) => (
                   <MenuItem key={option.value || 'all'} value={option.value}>
@@ -105,10 +118,9 @@ export default function SubmissionsPage() {
                 select
                 label="Broker"
                 value={brokerId}
-                onChange={(event) => {
-                  setBrokerId(event.target.value);
-                  setPage(0);
-                }}
+                onChange={(event) =>
+                  updateFilters({ brokerId: event.target.value, page: undefined })
+                }
               >
                 <MenuItem value="">All brokers</MenuItem>
                 {brokerQuery.data?.map((broker) => (
@@ -120,29 +132,26 @@ export default function SubmissionsPage() {
               <TextField
                 label="Company search"
                 value={companyQuery}
-                onChange={(event) => {
-                  setCompanyQuery(event.target.value);
-                  setPage(0);
-                }}
+                onChange={(event) =>
+                  updateFilters({ companySearch: event.target.value, page: undefined })
+                }
               />
               <TextField
                 type="date"
                 label="Created from"
                 value={createdFrom}
-                onChange={(event) => {
-                  setCreatedFrom(event.target.value);
-                  setPage(0);
-                }}
+                onChange={(event) =>
+                  updateFilters({ createdFrom: event.target.value, page: undefined })
+                }
                 slotProps={{ inputLabel: { shrink: true } }}
               />
               <TextField
                 type="date"
                 label="Created to"
                 value={createdTo}
-                onChange={(event) => {
-                  setCreatedTo(event.target.value);
-                  setPage(0);
-                }}
+                onChange={(event) =>
+                  updateFilters({ createdTo: event.target.value, page: undefined })
+                }
                 slotProps={{ inputLabel: { shrink: true } }}
               />
               <Stack direction="row" alignItems="center">
@@ -150,10 +159,12 @@ export default function SubmissionsPage() {
                   control={
                     <Checkbox
                       checked={hasDocuments}
-                      onChange={(event) => {
-                        setHasDocuments(event.target.checked);
-                        setPage(0);
-                      }}
+                      onChange={(event) =>
+                        updateFilters({
+                          hasDocuments: event.target.checked ? 'true' : undefined,
+                          page: undefined,
+                        })
+                      }
                     />
                   }
                   label="Has documents"
@@ -162,10 +173,12 @@ export default function SubmissionsPage() {
                   control={
                     <Checkbox
                       checked={hasNotes}
-                      onChange={(event) => {
-                        setHasNotes(event.target.checked);
-                        setPage(0);
-                      }}
+                      onChange={(event) =>
+                        updateFilters({
+                          hasNotes: event.target.checked ? 'true' : undefined,
+                          page: undefined,
+                        })
+                      }
                     />
                   }
                   label="Has notes"
@@ -269,8 +282,10 @@ export default function SubmissionsPage() {
             count={data?.count ?? 0}
             rowsPerPage={PAGE_SIZE}
             rowsPerPageOptions={[PAGE_SIZE]}
-            page={page}
-            onPageChange={(_, newPage) => setPage(newPage)}
+            page={urlPage - 1}
+            onPageChange={(_, newPage) =>
+              updateFilters({ page: newPage > 0 ? String(newPage + 1) : undefined })
+            }
           />
         </Card>
       </Stack>
