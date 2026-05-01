@@ -24,11 +24,12 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { PriorityChip, StatusChip } from '@/components/SubmissionChips';
 import { formatDate, toLocalDayEndISO, toLocalDayStartISO } from '@/lib/date';
 import { useBrokerOptions } from '@/lib/hooks/useBrokerOptions';
+import { useDebounceCallback } from '@/lib/hooks/useDebounce';
 import { useSubmissionsList } from '@/lib/hooks/useSubmissions';
 import { SubmissionStatus } from '@/lib/types';
 
@@ -57,6 +58,8 @@ export default function SubmissionsPage() {
   const hasNotes = searchParams.get('hasNotes') === 'true';
   const urlPage = Number(searchParams.get('page') ?? '1');
 
+  const [companyInput, setCompanyInput] = useState(companyQuery);
+
   const updateFilters = (updates: Record<string, string | undefined>) => {
     const params = new URLSearchParams(searchParams.toString());
     for (const [key, value] of Object.entries(updates)) {
@@ -68,6 +71,11 @@ export default function SubmissionsPage() {
     }
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   };
+
+  const debouncedUpdateCompany = useDebounceCallback(
+    (value: string) => updateFilters({ companySearch: value, page: undefined }),
+    300,
+  );
 
   const filters = useMemo(
     () => ({
@@ -132,10 +140,11 @@ export default function SubmissionsPage() {
               </TextField>
               <TextField
                 label="Company search"
-                value={companyQuery}
-                onChange={(event) =>
-                  updateFilters({ companySearch: event.target.value, page: undefined })
-                }
+                value={companyInput}
+                onChange={(event) => {
+                  setCompanyInput(event.target.value);
+                  debouncedUpdateCompany(event.target.value);
+                }}
               />
               <TextField
                 type="date"
